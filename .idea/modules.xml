@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BackdoorSoftwareWebsite.iml" filepath="$PROJECT_DIR$/BackdoorSoftwareWebsite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/BackdoorSoftware-website.iml" filepath="$PROJECT_DIR$/.idea/BackdoorSoftware-website.iml" />
     </modules>
   </component>
 </project>
