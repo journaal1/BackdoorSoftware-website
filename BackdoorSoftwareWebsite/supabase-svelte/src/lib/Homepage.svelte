@@ -1,83 +1,82 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte'
-    import { supabase } from '../supabaseClient'
+    import { onMount } from "svelte";
+    import type { AuthSession } from "@supabase/supabase-js";
+    import { supabase } from "../supabaseClient.ts";
 
-    export let size: number
-    export let url: string
+    export let session: AuthSession;
 
-    let avatarUrl: string = null
-    let uploading = false
-    let files: FileList
+    let loading = false
+    let username: string | null = null
+    let website: string | null = null
+    let avatarUrl: string | null = null
 
-    const dispatch = createEventDispatcher()
+    onMount(() => {
+        getProfile()
+    })
 
-    const downloadImage = async (path: string) => {
+    const getProfile = async () => {
         try {
-            const { data, error } = await supabase.storage.from('avatars').download(path)
+            loading = true
+            const { user } = session
 
-            if (error) {
-                throw error
+            const { data, error, status } = await supabase
+                .from('profiles')
+                .select('username, website, avatar_url')
+                .eq('id', user.id)
+                .single()
+
+            if (error && status !== 406) throw error
+
+            if (data) {
+                username = data.username
+                website = data.website
+                avatarUrl = data.avatar_url
             }
-
-            const url = URL.createObjectURL(data)
-            avatarUrl = url
-        } catch (error) {
-            if (error instanceof Error) {
-                console.log('Error downloading image: ', error.message)
-            }
-        }
-    }
-
-    const uploadAvatar = async () => {
-        try {
-            uploading = true
-
-            if (!files || files.length === 0) {
-                throw new Error('You must select an image to upload.')
-            }
-
-            const file = files[0]
-            const fileExt = file.name.split('.').pop()
-            const filePath = `${Math.random()}.${fileExt}`
-
-            let { error } = await supabase.storage.from('avatars').upload(filePath, file)
-
-            if (error) {
-                throw error
-            }
-
-            url = filePath
-            dispatch('upload')
         } catch (error) {
             if (error instanceof Error) {
                 alert(error.message)
             }
         } finally {
-            uploading = false
+            loading = false
         }
     }
 
-    $: if (url) downloadImage(url)
-</script>
+    const updateProfile = async () => {
+        try {
+            loading = true
+            const { user } = session
 
-<div style="width: {size}px" aria-live="polite">
-    {#if avatarUrl} <img src={avatarUrl} alt={avatarUrl ? 'Avatar' : 'No image'} class="avatar image"
-                         style="height: {size}px, width: {size}px" /> {:else}
-        <div class="avatar no-image" style="height: {size}px, width: {size}px" />
-    {/if}
-    <div style="width: {size}px">
-        <label class="button primary block" for="single">
-            {uploading ? 'Uploading ...' : 'Upload avatar'}
-        </label>
-        <span style="display:none">
-      <input
-              type="file"
-              id="single"
-              accept="image/*"
-              bind:files
-              on:change="{uploadAvatar}"
-              disabled="{uploading}"
-      />
-    </span>
-    </div>
+            const updates = {
+                id: user.id,
+                username,
+                website,
+                avatar_url: avatarUrl,
+                updated_at: new Date().toISOString(),
+            }
+
+            let { error } = await supabase.from('profiles').upsert(updates)
+
+            if (error) {
+                throw error
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                alert(error.message)
+            }
+        } finally {
+            loading = false
+        }
+    }
+</script>
+<div>
+    <h1>Backdoor software</h1>
+    <h2>Welkom</h2>
 </div>
+<form on:submit|preventDefault={updateProfile} class="form-widget">
+    <div>Profile picture: {session.user.profileurl}</div>
+    <div>Email: {session.user.email}</div>
+    <button type="button" class="button block" on:click={() => supabase.auth.signOut()}>
+        Sign Out
+    </button>
+</form>
+

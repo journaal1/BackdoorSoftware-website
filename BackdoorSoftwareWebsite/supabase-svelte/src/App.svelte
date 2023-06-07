@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import { supabase } from './supabaseClient.ts'
   import type { AuthSession } from '@supabase/supabase-js'
-  import Account from './lib/Account.svelte'
+  import Account from './lib/Homepage.svelte'
   import Auth from './lib/Auth.svelte'
 
   let session: AuthSession
