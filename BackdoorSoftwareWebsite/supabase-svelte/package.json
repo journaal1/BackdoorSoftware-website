@@ -22,6 +22,7 @@
     "@supabase/auth-helpers-sveltekit": "^0.10.1",
     "@supabase/supabase-js": "^2.24.0",
     "dotenv": "^16.1.4",
-    "supabase": "^1.64.8"
+    "supabase": "^1.64.8",
+    "svelte-spa-router": "^3.3.0"
   }
 }
