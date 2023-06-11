@@ -1,10 +1,11 @@
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
-    import Router, { push } from "svelte-spa-router";
-    import type { AuthSession } from "@supabase/supabase-js";
+    import Router, {push} from "svelte-spa-router";
+    import type {AuthSession} from "@supabase/supabase-js";
     import MessageCard from "../components/MessageCard.svelte";
-    import type { message } from "../types/custom.ts";
-    import { supabase } from "../supabaseClient.ts";
+    import ChatCard from "../components/ChatCard.svelte";
+    import type {message} from "../types/custom.ts";
+    import {supabase} from "../supabaseClient.ts";
 
 
     export let session: AuthSession;
@@ -34,9 +35,9 @@
     const getProfile = async () => {
         try {
             loading = true
-            const { user } = session
+            const {user} = session
 
-            const { data, error, status } = await supabase
+            const {data, error, status} = await supabase
                 .from('profiles')
                 .select('username, website, avatar_url')
                 .eq('id', user.id)
@@ -61,7 +62,7 @@
     const updateProfile = async () => {
         try {
             loading = true
-            const { user } = session
+            const {user} = session
 
             const updates = {
                 id: user.id,
@@ -71,7 +72,7 @@
                 updated_at: new Date().toISOString(),
             }
 
-            let { error } = await supabase.from('profiles').upsert(updates)
+            let {error} = await supabase.from('profiles').upsert(updates)
 
             if (error) {
                 throw error
@@ -94,7 +95,7 @@
     });
 
     async function sendMessage() {
-        const { data, error } = await supabase.from("messages").insert([
+        const {data, error} = await supabase.from("messages").insert([
             {
                 chat_id: 1,
                 author_id: session.user.email,
@@ -109,17 +110,17 @@
 </div>
 <form on:submit|preventDefault={updateProfile} class="form-widget">
     <div>Email: {session.user.email}</div>
-
-    <div class="flex flex-col space-y-1 p-2">
-        {#each allMessages as message}
-            <MessageCard own={message.author_id === session.user.email}>
-                {message.content}
-            </MessageCard>
-        {/each}
-    </div>
-
+    <ChatCard>
+        <div class="flex flex-col space-y-1 p-2">
+            {#each allMessages as message}
+                <MessageCard own={message.author_id === session.user.email}>
+                    {message.content}
+                </MessageCard>
+            {/each}
+        </div>
+    </ChatCard>
     <div class="absolute bottom-0 flex w-full space-x-4">
-        <input bind:value={newMessage} type="text" placeholder="Message" class="flex-1" />
+        <input bind:value={newMessage} type="text" placeholder="Message" class="flex-1"/>
         <button on:click={sendMessage} class="bg-gray-200 rounded p-2 hover:bg-gray-300">Send</button>
     </div>
 

@@ -1,39 +1,73 @@
 <script lang="ts">
-  import { supabase } from '../supabaseClient.ts'
+    import {supabase} from '../supabaseClient.ts'
 
-  let loading = false
+    let loading = false
+    let email = ''
 
-  const handleDiscordLogin = async () => {
-    try {
-      loading = true
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'discord',
-      })
-      console.log(data + "testje");
-      if (error) throw error
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message)
-      }
-    } finally {
-      loading = false
+    const handleDiscordLogin = async () => {
+        try {
+            loading = true
+            const {data, error} = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+            })
+            console.log(data + "testje");
+            if (error) throw error
+        } catch (error) {
+            if (error instanceof Error) {
+                alert(error.message)
+            }
+        } finally {
+            loading = false
+        }
     }
-  }
+    const handleLogin = async () => {
+        try {
+            loading = true
+            const {error} = await supabase.auth.signInWithOtp({email})
+            if (error) throw error
+            alert('Check your email for login link!')
+        } catch (error) {
+            if (error instanceof Error) {
+                alert(error.message)
+            }
+        } finally {
+            loading = false
+        }
+    }
+
 </script>
 
 <div class="row flex-center flex">
-  <div class="col-6 form-widget" aria-live="polite">
-    <h1 class="header">Backdoor software login.</h1>
-    <h2>Welcome!</h2>
-    <form class="form-widget" on:submit|preventDefault="{handleDiscordLogin}">
-      <div>
-        <label>Login using discord</label>
-      </div>
-      <div>
-        <button type="submit" class="button block" aria-live="polite" disabled="{loading}">
-          <span>{loading ? 'Loading' : 'DISCORD LOGIN'}</span>
-        </button>
-      </div>
-    </form>
-  </div>
+    <div class="col-6 form-widget" aria-live="polite">
+        <h1 class="header">Backdoor software login.</h1>
+        <h2>Welcome!</h2>
+        <form class="form-widget" on:submit|preventDefault="{handleDiscordLogin}">
+            <div>
+                <label>Login using discord</label>
+            </div>
+            <div>
+                <button type="submit" class="button block" aria-live="polite" disabled="{loading}">
+                    <span>{loading ? 'Loading' : 'DISCORD LOGIN'}</span>
+                </button>
+            </div>
+            <p class="description">Sign in via magic link with your email below</p>
+            <form class="form-widget" on:submit|preventDefault="{handleLogin}">
+                <div>
+                    <label for="email">Email</label>
+                    <input
+                            id="email"
+                            class="inputField"
+                            type="email"
+                            placeholder="Your email"
+                            bind:value="{email}"
+                    />
+                </div>
+                <div>
+                    <button type="submit" class="button block" aria-live="polite" disabled="{loading}">
+                        <span>{loading ? 'Loading' : 'Email Login'}</span>
+                    </button>
+                </div>
+            </form>
+        </form>
+    </div>
 </div>
